@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OneDoor prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#0874D1; --blue2:#0070D2; --navy:#084187; --ink:#1F2937; --text:#374151; --grey:#5B6470; --muted:#8A94A3;
+  --border:#D3E1F0; --line:#E7EDF4; --bg:#F4F7FB; --card:#FFFFFF; --pale:#E8F1FB; --pale2:#F2F8FD;
+  --green:#1B8B53; --mint:#DFF3E7; --orange:#C2410C; --porange:#FDF1EA; --amber:#B7791F; --cream:#FCF0D6; --lav:#E9E7FB; --purple:#5B4BC4;
+  --r:12px; --shadow:0 1px 2px rgba(16,24,40,.05),0 2px 8px rgba(16,24,40,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:Inter,Arial,sans-serif;color:var(--text);background:var(--bg);font-size:14px;line-height:1.45}
+button{font-family:inherit;font-size:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:14px}
+.app{display:grid;grid-template-columns:220px 1fr;grid-template-rows:56px 1fr;height:100vh}
+/* top bar */
+.top{grid-column:1/3;display:flex;align-items:center;gap:14px;padding:0 18px;background:var(--navy);color:#fff}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:19px;letter-spacing:-.2px}
+.brand .mark{width:30px;height:30px;border-radius:8px;background:var(--blue);display:grid;place-items:center}
+.brand b{color:#9CCBFF}
+.top .ctx{font-size:12px;color:#B9CCE6;border-left:1px solid #2C5C9B;padding-left:14px}
+.top .sp{flex:1}
+.persona{display:flex;gap:6px;background:#0D4E9E;border-radius:999px;padding:4px}
+.persona button{border:0;background:transparent;color:#CFE0F5;padding:6px 12px;border-radius:999px;font-weight:600;font-size:12.5px;display:flex;gap:7px;align-items:center}
+.persona button.on{background:#fff;color:var(--navy)}
+.av{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff}
+.behind{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#CFE0F5;user-select:none;cursor:pointer}
+.sw{width:34px;height:19px;border-radius:999px;background:#2C5C9B;position:relative;transition:.2s}
+.sw:after{content:"";position:absolute;width:15px;height:15px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.2s}
+.behind.on .sw{background:#4CAF7A}.behind.on .sw:after{left:17px}
+/* rail */
+.rail{background:#fff;border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:3px;overflow:auto}
+.rail .lbl{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:1.2px;padding:10px 12px 4px}
+.nav{display:flex;align-items:center;gap:11px;border:0;background:transparent;text-align:left;padding:9px 12px;border-radius:9px;color:var(--text);font-weight:500;width:100%}
+.nav:hover{background:var(--pale2)}
+.nav.on{background:var(--pale);color:var(--navy);font-weight:700}
+.nav svg{width:18px;height:18px;flex:none}
+.nav .ct{margin-left:auto;background:var(--blue);color:#fff;border-radius:999px;font-size:11px;font-weight:700;padding:1px 7px}
+.nav .ct.o{background:var(--orange)}
+.rail .foot{margin-top:auto;font-size:11px;color:var(--muted);padding:12px;border-top:1px solid var(--line)}
+/* main */
+main{overflow:auto;padding:26px 30px 60px}
+.wrap{max-width:1080px;margin:0 auto}
+h1{font-size:26px;color:var(--ink);margin:0 0 4px;letter-spacing:-.4px}
+.sub{color:var(--grey);margin:0 0 20px}
+h2{font-size:15px;color:var(--ink);margin:0 0 12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+.grid{display:grid;gap:16px}
+.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:1.35fr 1fr}
+.tile{display:flex;flex-direction:column;gap:2px;cursor:pointer;transition:.15s}
+.tile:hover{border-color:#9CC3EC;transform:translateY(-1px)}
+.tile .n{font-size:30px;font-weight:800;color:var(--blue);letter-spacing:-1px}
+.tile .t{font-weight:600;color:var(--ink)}
+.tile .d{font-size:12.5px;color:var(--grey)}
+/* search */
+.search{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:0 8px 0 16px;box-shadow:var(--shadow)}
+.search:focus-within{border-color:var(--blue)}
+.search input{flex:1;min-width:0;border:0;outline:0;padding:15px 0;font-size:15.5px;background:transparent}
+.btn{border:0;background:var(--blue);color:#fff;font-weight:600;padding:9px 16px;border-radius:9px}
+.btn:hover{background:var(--blue2)}
+.btn.ghost{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
+.btn.ghost:hover{background:var(--pale2)}
+.btn.sm{padding:6px 11px;font-size:12.5px;border-radius:8px}
+.btn.green{background:var(--green)}.btn.red{background:#fff;color:var(--orange);border:1.5px solid #F2C6AE}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--border);background:#fff;border-radius:999px;padding:7px 13px;font-weight:500;color:var(--navy);font-size:13px}
+.chip:hover{background:var(--pale);border-color:#9CC3EC}
+.hint{font-size:12px;color:var(--muted);margin-top:8px}
+/* lists */
+.row{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:none;font-size:17px}
+.grow{flex:1;min-width:0}
+.ttl{font-weight:600;color:var(--ink)}
+.meta{font-size:12.5px;color:var(--grey)}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.p-blue{background:var(--pale);color:var(--blue)}.p-green{background:var(--mint);color:var(--green)}.p-orange{background:var(--porange);color:var(--orange)}
+.p-amber{background:var(--cream);color:var(--amber)}.p-grey{background:#EEF1F5;color:var(--grey)}.p-purple{background:var(--lav);color:var(--purple)}
+.bts{display:none;margin-top:5px;gap:6px;flex-wrap:wrap}
+body.showbts .bts{display:flex}
+.bt{font-size:11px;border:1px dashed #9CB3CC;color:var(--navy);background:#F7FAFD;border-radius:6px;padding:2px 7px}
+.bt b{font-weight:700}
+/* catalogue */
+.cat{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.svc{border:1px solid var(--border);background:#fff;border-radius:11px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:6px;transition:.15s;min-height:104px}
+.svc:hover{border-color:#9CC3EC;box-shadow:var(--shadow)}
+.svc .h{display:flex;align-items:center;gap:9px;font-weight:600;color:var(--ink)}
+.svc .e{font-size:20px}
+.svc.soon{background:#FAFBFC}
+.tabs{display:flex;gap:6px;margin:0 0 16px;flex-wrap:wrap}
+.tab{border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 14px;font-weight:600;font-size:13px;color:var(--grey)}
+.tab.on{background:var(--navy);border-color:var(--navy);color:#fff}
+/* chat */
+.chat{display:flex;flex-direction:column;height:calc(100vh - 210px);min-height:440px}
+.msgs{flex:1;overflow:auto;padding:6px 4px 10px;display:flex;flex-direction:column;gap:12px}
+.m{max-width:78%;padding:11px 14px;border-radius:14px;line-height:1.5}
+.m.u{align-self:flex-end;background:var(--navy);color:#fff;border-bottom-right-radius:4px}
+.m.b{align-self:flex-start;background:#fff;border:1px solid var(--border);border-bottom-left-radius:4px}
+.m .src{display:block;margin-top:6px;font-size:12px;color:var(--blue);font-weight:600}
+.draft{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:9px;background:var(--pale2)}
+.draft .ttl{font-size:13.5px}
+.composer{display:flex;gap:10px;padding-top:10px;border-top:1px solid var(--line)}
+.composer input{flex:1;border:1.5px solid var(--border);border-radius:11px;padding:12px 14px;outline:0}
+.composer input:focus{border-color:var(--blue)}
+.tag{font-size:10.5px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase}
+/* timeline */
+.tl{display:flex;gap:0;margin-top:10px}
+.st{flex:1;position:relative;font-size:11.5px;color:var(--muted);padding-top:16px}
+.st:before{content:"";position:absolute;top:4px;left:0;right:0;height:3px;background:var(--line)}
+.st:after{content:"";position:absolute;top:0;left:0;width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid #C9D2DE}
+.st.done{color:var(--ink);font-weight:600}.st.done:before{background:var(--blue)}.st.done:after{background:var(--blue);border-color:var(--blue)}
+.st.cur{color:var(--blue);font-weight:700}.st.cur:after{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px #CFE3F7}
+/* progress */
+.bar{height:9px;border-radius:999px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),#3D9BEA);border-radius:999px;transition:width .4s}
+.task{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
+.task:first-child{border-top:0}
+.cb{width:22px;height:22px;border-radius:7px;border:2px solid #B9C6D6;display:grid;place-items:center;flex:none;background:#fff;margin-top:2px}
+.cb.on{background:var(--green);border-color:var(--green);color:#fff}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(15,30,55,.45);display:none;align-items:center;justify-content:center;z-index:20;padding:20px}
+.ov.on{display:flex}
+.modal{background:#fff;border-radius:16px;width:min(520px,100%);padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.25);max-height:90vh;overflow:auto}
+.modal label{display:block;font-size:12.5px;font-weight:600;color:var(--grey);margin:12px 0 5px}
+.modal input,.modal select,.modal textarea{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px 11px;outline:0}
+.modal textarea{min-height:70px;resize:vertical}
+.route{margin-top:14px;background:var(--pale2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px}
+/* toast */
+.toasts{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:8px;z-index:30}
+.toast{background:var(--ink);color:#fff;padding:11px 15px;border-radius:10px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:340px;animation:in .25s}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.empty{text-align:center;padding:30px 10px;color:var(--grey)}
+.banner{display:flex;gap:14px;align-items:center;background:linear-gradient(100deg,#0B5FB4,#0874D1);color:#fff;border-radius:14px;padding:18px 20px}
+.banner .t{font-weight:700;font-size:16px}.banner .d{font-size:13px;color:#D6E6F7}
+.guide{background:var(--cream);border:1px solid #F1DFB0;color:#6B4E12;border-radius:12px;padding:12px 14px;font-size:13px;display:flex;gap:10px;align-items:flex-start}
+.guide b{color:#5A3F08}
+.kbd{display:inline-block;border:1px solid #E3CF97;background:#fff;border-radius:6px;padding:0 6px;font-size:12px;cursor:pointer;margin:2px 2px 0 0;color:#5A3F08}
+@media (max-width:860px){
+  .app{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
+  .top{flex-wrap:wrap;height:auto;padding:10px 12px;gap:8px}.top .ctx{display:none}
+  .rail{grid-row:3;flex-direction:row;overflow-x:auto;border-right:0;border-top:1px solid var(--line);padding:6px}
+  .rail .lbl,.rail .foot{display:none}.nav{flex-direction:column;gap:3px;font-size:11px;padding:6px 8px;min-width:68px;text-align:center}
+  .nav .ct{position:absolute;margin:0 0 0 22px;font-size:9.5px}
+  .g3,.g2{grid-template-columns:1fr}main{padding:18px 14px 40px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><div class="mark"><svg width="17" height="17" viewBox="0 0 24 24" fill="#fff"><path d="M4 21V4a1 1 0 0 1 1-1h9.5L18 4.2V21h2v1H2v-1h2zm9 0V5.3L6 4.4V21h7zm-2.2-8.6a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8z"/></svg></div><span>One<b>Door</b></span></div>
+    <div class="ctx">Inside Microsoft Teams · prototype</div>
+    <div class="sp"></div>
+    <div class="behind" id="bts" title="Show which existing system handles each item"><div class="sw"></div>Show what's behind</div>
+    <div class="persona" id="persona"></div>
+  </header>
+  <nav class="rail" id="rail"></nav>
+  <main><div class="wrap" id="view"></div></main>
+</div>
+<div class="ov" id="ov"><div class="modal" id="modal"></div></div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* ---------------- data ---------------- */
+const PEOPLE = {
+  ravi:  {name:"Ravi",  full:"Ravi Kumar",  role:"Claims Analyst · night shift", site:"Hyderabad", color:"#0874D1", manager:"meera"},
+  priya: {name:"Priya", full:"Priya Nair",  role:"Data Engineer · joined Monday", site:"Bengaluru", color:"#1B8B53", manager:"meera", newJoiner:true},
+  meera: {name:"Meera", full:"Meera Shah",  role:"Team Manager · 12 reports", site:"Hyderabad", color:"#5B4BC4", isManager:true},
+};
+const TEAMS = {
+  IT:{label:"IT", sys:"IT service desk", cls:"p-blue", icon:"💻", bg:"#E8F1FB"},
+  HR:{label:"HR", sys:"HR system", cls:"p-purple", icon:"🧑‍💼", bg:"#E9E7FB"},
+  ATT:{label:"HR · Attendance", sys:"Time & attendance", cls:"p-purple", icon:"🕒", bg:"#E9E7FB"},
+  ADMIN:{label:"Admin", sys:"Facilities tool", cls:"p-amber", icon:"🏢", bg:"#FCF0D6"},
+  PAY:{label:"Payroll", sys:"Payroll portal", cls:"p-green", icon:"💰", bg:"#DFF3E7"},
+  FIN:{label:"Finance", sys:"Expense tool", cls:"p-green", icon:"🧾", bg:"#DFF3E7"},
+  LND:{label:"Learning", sys:"Learning platform", cls:"p-blue", icon:"🎓", bg:"#E8F1FB"},
+};
+// level: Link = deep link + SSO, Show = data shown here, Do = done here via API
+const SERVICES = [
+  {id:"password", t:"Reset my password", e:"🔑", team:"IT", level:"Do", eta:"10 minutes", cat:"IT", d:"Unlock your account or reset a password"},
+  {id:"access", t:"Get access to an app", e:"🔐", team:"IT", level:"Do", eta:"1 day", cat:"IT", d:"Request access; your manager approves", approval:true},
+  {id:"laptop", t:"Fix my laptop", e:"💻", team:"IT", level:"Do", eta:"1 working day", cat:"IT", d:"Slow, broken, not charging, won't start"},
+  {id:"leave", t:"Apply for leave", e:"🌴", team:"ATT", level:"Do", eta:"Manager approval", cat:"Time off", d:"Casual, sick or earned leave", approval:true},
+  {id:"leavebal", t:"Check my leave balance", e:"📅", team:"ATT", level:"Show", eta:"Instant", cat:"Time off", d:"See what you have left this year", instant:true},
+  {id:"attendance", t:"Correct my attendance", e:"🕒", team:"ATT", level:"Do", eta:"Manager approval", cat:"Time off", d:"Wrongly marked absent or late", approval:true},
+  {id:"badge", t:"Fix my ID badge", e:"🪪", team:"ADMIN", level:"Do", eta:"4 hours", cat:"Office", d:"Badge not swiping at the gate or floor"},
+  {id:"payslip", t:"Get my payslip", e:"💰", team:"PAY", level:"Link", eta:"Instant", cat:"Pay", d:"Payslips and tax documents", instant:true},
+  {id:"course", t:"Find a course", e:"🎓", team:"LND", level:"Link", eta:"Instant", cat:"Learning", d:"Mandatory and optional learning", instant:true},
+  {id:"reimb", t:"Check a reimbursement", e:"🧾", team:"FIN", level:"Show", cat:"Pay", d:"Where is my claim?", soon:true},
+  {id:"seat", t:"Book a desk", e:"🪑", team:"ADMIN", level:"Do", cat:"Office", d:"Pick a desk for your office day", soon:true},
+  {id:"idcard", t:"Replace a lost ID card", e:"🆔", team:"ADMIN", level:"Do", cat:"Office", d:"Report loss and get a new card", soon:true},
+];
+const KB = [
+  {k:["carry","forward","unused","leave","lapse"], q:"Can I carry forward unused leave?", a:"Yes. You can carry forward up to 10 earned leaves into next year. Casual and sick leaves don't carry forward.", src:"Leave policy · section 4 (India)"},
+  {k:["holiday","holidays","festival","diwali","list"], q:"Holiday list for this year", a:"Your location follows the Hyderabad holiday list: 10 fixed holidays plus 2 floating holidays you can choose.", src:"Holiday calendar 2026 · Hyderabad"},
+  {k:["wifi","wi-fi","network","internet","vpn"], q:"Can't connect to Wi-Fi or VPN", a:"Restart the VPN client, then sign in again with your company login. If it still fails, raise an IT request and attach a screenshot.", src:"IT help article · VPN and Wi-Fi", svc:"laptop"},
+  {k:["night","shift","allowance","transport","cab"], q:"Night-shift allowance and cab", a:"Night-shift staff get a shift allowance each month and a company cab for drop. Book the cab by 4 pm on the same day.", src:"Shift policy · section 2"},
+  {k:["maternity","paternity","parental","baby"], q:"Parental leave", a:"Birth mothers get 26 weeks of paid leave; other parents get 2 weeks. Use the Parental leave checklist to plan it.", src:"Parental leave policy"},
+];
+const LEVELTXT = {Link:"Link — opens the existing tool with single sign-on", Show:"Show — data pulled into OneDoor", Do:"Do — done here through the system's API"};
+
+/* ---------------- state ---------------- */
+const S = {
+  me:"ravi", view:"home", showBts:false, catTab:"All", q:"",
+  seq: 1043,
+  requests: [
+    {id:"REQ-1041", who:"ravi", svc:"laptop", t:"Laptop battery not charging", step:2, status:"In progress", when:"Yesterday", note:"Engineer assigned"},
+    {id:"REQ-1042", who:"priya", svc:"access", t:"Access to the claims data warehouse", step:1, status:"Waiting for manager", when:"Today", needsApproval:true},
+  ],
+  approvals: [
+    {id:"APR-1", req:"REQ-1042", who:"priya", t:"Access to the claims data warehouse", kind:"App access", when:"Today, 9:10 am"},
+    {id:"APR-2", req:null, who:"other", whoName:"Arjun", t:"Leave · 2 days (24–25 Nov)", kind:"Leave", when:"Today, 8:02 am"},
+    {id:"APR-3", req:null, who:"other", whoName:"Sana", t:"Expense claim · team dinner", kind:"Expense", when:"Yesterday", tool:"Expense tool"},
+  ],
+  onboarding: [
+    {t:"Upload your joining documents", team:"HR", done:true, by:"You · before Day 1"},
+    {t:"Laptop delivered and set up", team:"IT", done:true, by:"Ordered automatically when HR created your record"},
+    {t:"Accounts and app access ready", team:"IT", done:true, by:"Started automatically · email, Teams, VPN"},
+    {t:"Collect your ID badge", team:"ADMIN", done:false, by:"Reception, 2nd floor · ready now"},
+    {t:"Finish 3 mandatory compliance courses", team:"LND", done:false, by:"Due in 14 days · opens the learning platform"},
+    {t:"Meet your buddy, Karthik", team:"HR", done:false, by:"Teams call booked · Wed 4 pm"},
+    {t:"Set your first goals with Meera", team:"HR", done:false, by:"Due in 30 days"},
+  ],
+  chat: {ravi:[], priya:[], meera:[]},
+  leaveBal: {ravi:{casual:5, sick:6, earned:9}, priya:{casual:2, sick:1, earned:0}, meera:{casual:4, sick:5, earned:14}},
+};
+
+/* ---------------- helpers ---------------- */
+const $ = (s, el=document) => el.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const svc = (id) => SERVICES.find(s => s.id === id);
+const me = () => PEOPLE[S.me];
+const STEPS = ["Submitted", "With team", "Done"];
+const STEPS_APPR = ["Submitted", "Manager approval", "With team", "Done"];
+function toast(msg){ const box=$("#toasts"); while(box.children.length>=2) box.firstChild.remove(); const t=document.createElement("div"); t.className="toast"; t.innerHTML=msg; $("#toasts").appendChild(t); setTimeout(()=>t.remove(), 3600); }
+function bts(teamKey, level){ const tm=TEAMS[teamKey]; return `<div class="bts"><span class="bt">Runs in: <b>${tm.sys}</b></span><span class="bt">Owner: <b>${tm.label}</b></span>${level?`<span class="bt">Level: <b>${level}</b></span>`:""}</div>`; }
+function teamPill(k){ const tm=TEAMS[k]; return `<span class="pill ${tm.cls}">${tm.label}</span>`; }
+function statusPill(r){
+  const m = {"Done":"p-green","Waiting for manager":"p-amber","In progress":"p-blue","Submitted":"p-blue","Rejected":"p-orange"};
+  return `<span class="pill ${m[r.status]||"p-grey"}">${r.status}</span>`;
+}
+function myReqs(){ return S.requests.filter(r => r.who === S.me); }
+function openReqs(){ return myReqs().filter(r => r.status !== "Done" && r.status !== "Rejected"); }
+function myApprovals(){ return me().isManager ? S.approvals : []; }
+function newReq(svcId, title, extra={}){
+  const s = svc(svcId);
+  const r = {id:"REQ-" + (++S.seq), who:S.me, svc:svcId, t:title || s.t, step: s.approval ? 1 : 1, status: s.approval ? "Waiting for manager" : "In progress", when:"Just now", needsApproval:!!s.approval, ...extra};
+  S.requests.unshift(r);
+  if (s.approval){
+    S.approvals.unshift({id:"APR-"+r.id, req:r.id, who:S.me, t:r.t, kind:s.t, when:"Just now"});
+  }
+  return r;
+}
+
+/* ---------------- shell ---------------- */
+const ICONS = {
+  home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  ask:'<path d="M4 5h16v11H8l-4 4z"/><circle cx="9" cy="10.5" r="1"/><circle cx="12" cy="10.5" r="1"/><circle cx="15" cy="10.5" r="1"/>',
+  want:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+  req:'<path d="M8 4h8M9 2h6v4H9z"/><rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 11h6M9 15h4"/>',
+  journey:'<path d="M5 19c3-1 4-4 7-4s4 3 7 3"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="6" r="2"/><path d="M19 8v4"/>',
+  appr:'<path d="M20 6L9 17l-5-5"/>',
+};
+function icon(n){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`; }
+function renderTop(){
+  $("#persona").innerHTML = Object.entries(PEOPLE).map(([k,p]) =>
+    `<button class="${S.me===k?"on":""}" data-p="${k}"><span class="av" style="background:${p.color}">${p.name[0]}</span>${p.name}</button>`).join("");
+  $("#persona").querySelectorAll("button").forEach(b => b.onclick = () => { S.me=b.dataset.p; if(S.view==="approvals" && !me().isManager) S.view="home"; render(); toast(`Now viewing as <b>${me().full}</b> · ${me().role}`); });
+}
+function renderRail(){
+  const items = [["home","Home"],["ask","Ask OneDoor"],["want","I want to…"],["req","My Requests", openReqs().length],["journey","Journeys"]];
+  if (me().isManager) items.push(["appr","Approvals", myApprovals().length, true]);
+  const map = {home:"home",ask:"ask",want:"want",req:"requests",journey:"journeys",appr:"approvals"};
+  $("#rail").innerHTML = `<div class="lbl">ONEDOOR</div>` + items.map(([ic,l,c,o]) =>
+    `<button class="nav ${S.view===map[ic]?"on":""}" data-v="${map[ic]}">${icon(ic)}<span>${l}</span>${c?`<span class="ct ${o?"o":""}">${c}</span>`:""}</button>`).join("") +
+    `<div class="foot">Prototype for a case study. All names and data are made up.</div>`;
+  $("#rail").querySelectorAll(".nav").forEach(b => b.onclick = () => go(b.dataset.v));
+}
+function go(v, extra){ S.view = v; if (extra) Object.assign(S, extra); render(); $("main").scrollTop = 0; }
+function render(){
+  document.body.classList.toggle("showbts", S.showBts);
+  $("#bts").classList.toggle("on", S.showBts);
+  renderTop(); renderRail();
+  const V = {home:vHome, ask:vAsk, want:vWant, requests:vRequests, journeys:vJourneys, approvals:vApprovals, search:vSearch}[S.view];
+  $("#view").innerHTML = V();
+  bind();
+}
+
+/* ---------------- views ---------------- */
+function vHome(){
+  const p = me(); const open = openReqs(); const appr = myApprovals();
+  const hour = new Date().getHours(); const greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const tasks = p.newJoiner ? S.onboarding.filter(t=>!t.done).length : (S.me==="ravi"?1:2);
+  const guide = S.me==="ravi"
+    ? `<div class="guide">👋 <div><b>Try the demo:</b> Ravi's badge didn't swipe last night and now he's marked absent. Ask OneDoor: <span class="kbd" data-say="My badge didn't work yesterday and now I'm marked absent">“My badge didn't work and I'm marked absent”</span> Then switch to <b>Meera</b> (top right) to approve it.</div></div>`
+    : S.me==="priya" ? `<div class="guide">👋 <div><b>Try the demo:</b> Priya joined on Monday. Open her <b>onboarding checklist</b> to see how one event set off tasks in IT, Admin, Learning and HR.</div></div>`
+    : `<div class="guide">👋 <div><b>Try the demo:</b> Meera sees approvals from every tool in one inbox. Approve one, then switch back to that employee to see their request move.</div></div>`;
+  const alerts = [
+    S.me!=="priya" ? ["💰","Your October payslip is ready","Payroll · 2 Nov","payslip"] : ["🎓","3 compliance courses are due in 14 days","Learning · today","course"],
+    ...myReqs().filter(r=>r.status==="Done").slice(0,1).map(r=>["✅",`${r.t} is done`,`${TEAMS[svc(r.svc).team].label} · ${r.when}`,null]),
+    ["📣", p.site + " office: new cafeteria timings for night shift","Comms · for " + p.site + " only", null],
+  ];
+  return `
+  <h1>${greet}, ${p.name}</h1>
+  <p class="sub">${p.role} · ${p.site}</p>
+  <div class="search"><span>🔍</span><input id="q" placeholder="Search or ask anything — e.g. “leave balance”, “laptop not charging”, “holiday list”" autocomplete="off"><button class="btn" id="qgo">Search</button></div>
+  <div class="hint">Try: <span class="kbd" data-q="leave balance">leave balance</span><span class="kbd" data-q="carry forward leave">carry forward leave</span><span class="kbd" data-q="laptop not charging">laptop not charging</span><span class="kbd" data-q="vpn">vpn</span></div>
+  <div style="height:18px"></div>
+  ${guide}
+  <div style="height:18px"></div>
+  <div class="grid g3">
+    <div class="card tile" data-go="${p.newJoiner?"journeys":"requests"}"><div class="n">${tasks}</div><div class="t">My tasks</div><div class="d">${p.newJoiner?"Left on your onboarding checklist":"Things waiting on you"}</div></div>
+    <div class="card tile" data-go="requests"><div class="n">${open.length}</div><div class="t">Open requests</div><div class="d">Across IT, HR, Admin and more</div></div>
+    ${p.isManager
+      ? `<div class="card tile" data-go="approvals"><div class="n" style="color:var(--orange)">${appr.length}</div><div class="t">Approvals</div><div class="d">From every tool, in one inbox</div></div>`
+      : `<div class="card tile" data-go="ask"><div class="n" style="font-size:26px">💬</div><div class="t">Ask OneDoor</div><div class="d">Describe your problem in your own words</div></div>`}
+  </div>
+  <div style="height:16px"></div>
+  ${p.newJoiner ? onboardCard() : ""}
+  <div class="grid g2">
+    <div class="card"><h2>I want to…</h2><div class="chips">
+      ${["laptop","leave","attendance","badge","payslip","password","course"].map(id=>`<button class="chip" data-svc="${id}">${svc(id).e} ${svc(id).t}</button>`).join("")}
+      <button class="chip" data-go="want" style="color:var(--blue);font-weight:700">See all →</button></div></div>
+    <div class="card"><h2>For you</h2>${alerts.map(a=>`<div class="row"><div class="ic" style="background:var(--pale2)">${a[0]}</div><div class="grow"><div class="ttl">${a[1]}</div><div class="meta">${a[2]}</div></div>${a[3]?`<button class="btn sm ghost" data-svc="${a[3]}">Open</button>`:""}</div>`).join("")}</div>
+  </div>`;
+}
+function onboardCard(){
+  const d = S.onboarding.filter(t=>t.done).length, n = S.onboarding.length;
+  return `<div class="banner" style="margin-bottom:16px;cursor:pointer" data-go="journeys"><div style="font-size:28px">🚀</div><div style="flex:1"><div class="t">Your first 30 days · ${d} of ${n} done</div><div class="d">Laptop and access were set up automatically. Next: collect your ID badge.</div><div class="bar" style="background:rgba(255,255,255,.25);margin-top:9px"><i style="width:${d/n*100}%;background:#fff"></i></div></div><button class="btn ghost" style="background:#fff">Open checklist</button></div>`;
+}
+function vSearch(){
+  const q = S.q.trim().toLowerCase(); const words = q.split(/\W+/).filter(w=>w.length>2);
+  const hit = (arr) => words.some(w => arr.some(k => k.includes(w) || w.includes(k)));
+  const svcs = SERVICES.filter(s => hit([s.t.toLowerCase(), s.d.toLowerCase(), s.cat.toLowerCase(), s.id]));
+  const arts = KB.filter(a => hit(a.k));
+  let answer = "";
+  if (/balance/.test(q) || (/leave/.test(q) && /(how many|left|remaining|balance)/.test(q))){
+    const b = S.leaveBal[S.me];
+    answer = `<div class="card" style="border-color:#9CC3EC;background:var(--pale2)"><div class="tag">Answer</div><div style="font-size:17px;font-weight:700;color:var(--ink);margin:4px 0">You have ${b.casual} casual, ${b.sick} sick and ${b.earned} earned leaves left.</div><div class="meta">Live from Time & attendance · as of today</div>${bts("ATT","Show")}<div style="margin-top:10px"><button class="btn sm" data-svc="leave">Apply for leave</button></div></div>`;
+  } else if (arts[0]){
+    const a = arts[0];
+    answer = `<div class="card" style="border-color:#9CC3EC;background:var(--pale2)"><div class="tag">Answer</div><div style="font-size:16px;font-weight:600;color:var(--ink);margin:4px 0">${a.a}</div><div class="meta">Source: <span style="color:var(--blue);font-weight:600">${a.src}</span></div>${a.svc?`<div style="margin-top:10px"><button class="btn sm" data-svc="${a.svc}">${svc(a.svc).t}</button></div>`:""}</div>`;
+  } else if (/laptop|charg|slow|screen|keyboard/.test(q)){
+    answer = `<div class="card" style="border-color:#9CC3EC;background:var(--pale2)"><div class="tag">Answer</div><div style="font-size:16px;font-weight:600;color:var(--ink);margin:4px 0">Try a different charger and socket first. If the battery icon still shows “not charging”, raise an IT request and we'll swap the charger or battery.</div><div class="meta">Source: <span style="color:var(--blue);font-weight:600">IT help article · Laptop power issues</span></div><div style="margin-top:10px"><button class="btn sm" data-svc="laptop">Fix my laptop</button></div></div>`;
+  }
+  return `<p class="sub" style="margin-bottom:12px"><button class="btn sm ghost" data-go="home">← Home</button></p>
+  <div class="search"><span>🔍</span><input id="q" value="${esc(S.q)}" autocomplete="off"><button class="btn" id="qgo">Search</button></div>
+  <div style="height:16px"></div>
+  ${answer || (q ? `<div class="card empty">No direct answer for “${esc(S.q)}”. <br><br><button class="btn" data-go="ask">Ask OneDoor instead</button></div>` : "")}
+  <div style="height:16px"></div>
+  ${svcs.length ? `<h2>Services</h2><div class="cat">${svcs.map(svcCard).join("")}</div><div style="height:16px"></div>` : ""}
+  ${arts.length ? `<div class="card"><h2>Help articles</h2>${arts.map(a=>`<div class="row"><div class="ic" style="background:var(--pale2)">📄</div><div class="grow"><div class="ttl">${a.q}</div><div class="meta">${a.src}</div></div></div>`).join("")}</div>` : ""}
+  <p class="hint">One search across HR policies, IT help, admin notices and learning — instead of a separate search in every portal.</p>`;
+}
+function svcCard(s){
+  const tm = TEAMS[s.team];
+  return `<button class="svc ${s.soon?"soon":""}" data-svc="${s.id}"><div class="h"><span class="e">${s.e}</span>${s.t}</div><div class="meta">${s.d}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:auto">${s.soon?`<span class="pill p-grey">Coming in Phase 2</span>`:s.instant?`<span class="pill p-green">Instant</span>`:s.approval?`<span class="pill p-amber">Needs approval</span>`:`<span class="pill p-blue">${s.eta}</span>`}</div>
+    ${bts(s.team, s.level)}</button>`;
+}
+function vWant(){
+  const cats = ["All", ...new Set(SERVICES.map(s=>s.cat))];
+  const list = SERVICES.filter(s => S.catTab==="All" || s.cat===S.catTab);
+  return `<h1>I want to…</h1><p class="sub">Pick what you need. You don't need to know which team owns it — OneDoor sends it to the right place.</p>
+  <div class="tabs">${cats.map(c=>`<button class="tab ${S.catTab===c?"on":""}" data-cat="${c}">${c}</button>`).join("")}</div>
+  <div class="cat">${list.map(svcCard).join("")}</div>
+  <p class="hint">Turn on <b>Show what's behind</b> (top bar) to see which existing system handles each service, and whether OneDoor links to it, shows its data, or does the task through its API.</p>`;
+}
+function vRequests(){
+  const rs = myReqs();
+  return `<h1>My Requests</h1><p class="sub">Everything you've asked for, from every team, in one place.</p>
+  ${rs.length ? rs.map(r => {
+    const s = svc(r.svc); const steps = r.needsApproval ? STEPS_APPR : STEPS;
+    const cur = r.status==="Done" ? steps.length : r.step;
+    return `<div class="card" style="margin-bottom:12px"><div style="display:flex;gap:12px;align-items:center">
+      <div class="ic" style="background:${TEAMS[s.team].bg}">${s.e}</div>
+      <div class="grow"><div class="ttl">${esc(r.t)}</div><div class="meta">${r.id} · ${r.when}${r.note?` · ${esc(r.note)}`:""}</div></div>
+      ${teamPill(s.team)} ${statusPill(r)}</div>
+      <div class="tl">${steps.map((st,i)=>`<div class="st ${i<cur?"done":i===cur?"cur":""}">${st}</div>`).join("")}</div>
+      ${bts(s.team, s.level)}
+      ${r.status!=="Done" && r.status!=="Rejected" && !(r.needsApproval && r.step===1) ? `<div style="margin-top:12px;display:flex;gap:8px;align-items:center"><button class="btn sm ghost" data-adv="${r.id}">▶ Simulate progress</button><span class="hint" style="margin:0">Demo only: moves the request one step</span></div>` : ""}
+      ${r.needsApproval && r.step===1 && r.status==="Waiting for manager" ? `<div class="hint">Waiting for ${PEOPLE[PEOPLE[r.who].manager||"meera"].name}. Switch to <b>Meera</b> to approve it.</div>`:""}
+    </div>`;}).join("") : `<div class="card empty">No requests yet. <br><br><button class="btn" data-go="want">Ask for something</button></div>`}`;
+}
+function vJourneys(){
+  const p = me();
+  const other = `<div class="grid g3" style="margin-top:16px">
+    ${[["🔁","Moving role or team","Access, cost centre, seat and manager handover in one checklist"],["👶","Parental leave","Leave, benefits, handover and return-to-work plan"],["👋","Leaving the company","Return assets, remove access, final settlement status, handover"]].map(j=>`<div class="card"><div style="font-size:24px">${j[0]}</div><div class="ttl" style="margin:6px 0 4px">${j[1]}</div><div class="meta">${j[2]}</div><div style="margin-top:10px"><span class="pill p-grey">Coming in Phase 2</span></div></div>`).join("")}</div>`;
+  if (!p.newJoiner){
+    return `<h1>Journeys</h1><p class="sub">Checklists for big moments that involve several teams at once.</p>
+    <div class="card empty">You don't have an active journey right now.<br><span class="meta">When HR records a life event (joining, moving, leaving), the right checklist starts here automatically.</span><br><br><button class="btn ghost" data-p2="priya">See Priya's onboarding</button></div>${other}`;
+  }
+  const d = S.onboarding.filter(t=>t.done).length, n = S.onboarding.length;
+  return `<h1>Your first 30 days</h1><p class="sub">One checklist instead of chasing 4 teams. When HR created your record, OneDoor started the tasks below in each team's own system.</p>
+  <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="ttl">${d} of ${n} done</div><span class="pill ${d===n?"p-green":"p-blue"}">${d===n?"All done 🎉":Math.round(d/n*100)+"%"}</span></div><div class="bar"><i style="width:${d/n*100}%"></i></div>
+  <div style="margin-top:8px">${S.onboarding.map((t,i)=>`<div class="task"><button class="cb ${t.done?"on":""}" data-task="${i}" aria-label="Mark done">${t.done?"✓":""}</button><div class="grow"><div class="ttl" style="${t.done?"color:var(--grey);text-decoration:line-through":""}">${t.t}</div><div class="meta">${t.by}</div>${bts(t.team, t.team==="LND"?"Link":"Do")}</div>${teamPill(t.team)}</div>`).join("")}</div></div>
+  <h2 style="margin-top:22px">Other journeys</h2>${other}`;
+}
+function vApprovals(){
+  const a = myApprovals();
+  return `<h1>Approvals</h1><p class="sub">Requests from every tool — leave, access, attendance, expenses — in one inbox. Approving here updates the original system.</p>
+  ${a.length ? `<div class="card">${a.map(x=>{
+    const name = x.who==="other" ? x.whoName : PEOPLE[x.who].name;
+    const tool = x.tool || (x.req ? TEAMS[svc(S.requests.find(r=>r.id===x.req).svc).team].sys : "Time & attendance");
+    return `<div class="row"><span class="av" style="background:${x.who==="other"?"#8A94A3":PEOPLE[x.who].color};width:34px;height:34px;font-size:14px">${name[0]}</span>
+    <div class="grow"><div class="ttl">${name} · ${esc(x.t)}</div><div class="meta">${x.kind} · ${x.when}</div><div class="bts"><span class="bt">Approval saved back to: <b>${tool}</b></span></div></div>
+    <button class="btn sm red" data-rej="${x.id}">Reject</button><button class="btn sm green" data-ok="${x.id}">Approve</button></div>`;}).join("")}</div>`
+  : `<div class="card empty">🎉 All caught up. Nothing waiting for you.</div>`}`;
+}
+
+/* ---------------- assistant ---------------- */
+function vAsk(){
+  const msgs = S.chat[S.me];
+  const starters = ["My badge didn't work yesterday and now I'm marked absent","How many leaves do I have left?","Can I carry forward my unused leave?","My laptop is not charging","I think my salary this month is wrong"];
+  return `<h1>Ask OneDoor</h1><p class="sub">Describe what you need in your own words. OneDoor works out which teams it involves, answers from approved policies, and fills in requests for you to confirm.</p>
+  <div class="card chat"><div class="msgs" id="msgs">
+    ${msgs.length ? "" : `<div class="m b">Hi ${me().name} 👋 What do you need help with? You don't need to know which team handles it.</div>`}
+    ${msgs.map(m => m.u ? `<div class="m u">${esc(m.u)}</div>` : `<div class="m b">${m.b}</div>`).join("")}
+  </div>
+  <div class="chips" style="margin:8px 0">${starters.map(s=>`<button class="chip" data-say="${esc(s)}" style="font-size:12px">${esc(s)}</button>`).join("")}</div>
+  <form class="composer" id="composer"><input id="say" placeholder="Type your question or problem…" autocomplete="off"><button class="btn">Send</button></form></div>`;
+}
+function draftBox(drafts, key){
+  return drafts.map(d => { const s = svc(d.svc); return `<div class="draft"><div style="display:flex;gap:8px;align-items:center"><span>${s.e}</span><div class="grow"><div class="ttl">${esc(d.t)}</div><div class="meta">${TEAMS[s.team].label} · ${s.approval?"needs manager approval":"expected: "+s.eta}</div></div>${teamPill(s.team)}</div>${bts(s.team, s.level)}</div>`; }).join("") +
+  `<div style="display:flex;gap:8px;margin-top:10px" data-dk="${key}"><button class="btn sm" data-submit="${key}">${drafts.length>1?"Submit both":"Submit"}</button><button class="btn sm ghost" data-cancel="${key}">Not now</button></div>`;
+}
+const DRAFTS = {};
+function reply(text){
+  const t = text.toLowerCase(); const name = me().name;
+  const has = (...w) => w.some(x => t.includes(x));
+  // multi-intent: badge + attendance
+  if (has("badge","swipe","card didn") && has("absent","attendance","marked")){
+    const key = "d"+Date.now();
+    DRAFTS[key] = [{svc:"badge", t:"Badge not swiping at the floor gate"},{svc:"attendance", t:"Correct attendance: marked absent on " + yday() + " (badge failed)"}];
+    return `That's <b>two things</b>, handled by two different teams:<br>1. A <b>badge fix</b> → Admin<br>2. An <b>attendance correction</b> → HR, which your manager approves<br><br>I've filled in both. Your manager will get the approval in Teams.${draftBox(DRAFTS[key], key)}<span class="src">I understood · I acted (after you confirm)</span>`;
+  }
+  if (has("salary","pay is wrong","payslip wrong","underpaid","deduction")){
+    newReq("payslip", "Salary query (private) — routed to payroll team", {svc:"payslip", status:"In progress", step:1, note:"Private · only payroll can see details"});
+    return `I'm sorry about that. Pay questions need someone who can see your details, so I won't guess.<br><br>I've opened a <b>private request</b> with the payroll team. You'll see updates in <b>My Requests</b>, and they usually reply within 1 working day.<span class="src">Sensitive topic → handed to a person</span>`;
+  }
+  if (has("how many leave","leave balance","leaves left","leave left","leaves do i have")){
+    const b = S.leaveBal[S.me];
+    return `You have <b>${b.casual} casual</b>, <b>${b.sick} sick</b> and <b>${b.earned} earned</b> leaves left this year.<span class="src">Source: Time & attendance · live</span>${quick("leave","Apply for leave")}`;
+  }
+  const kb = KB.find(a => a.k.filter(k => t.includes(k)).length >= 2) || KB.find(a => a.k.some(k => t.includes(k)) && !has("apply"));
+  if (kb && !has("not charging","broken")){
+    return `${kb.a}<span class="src">Source: ${kb.src}</span>${kb.svc?quick(kb.svc, svc(kb.svc).t):""}`;
+  }
+  if (has("laptop","charging","screen","keyboard","computer","slow")){
+    const key = "d"+Date.now(); DRAFTS[key] = [{svc:"laptop", t: text.length < 60 ? cap(text) : "Laptop issue"}];
+    return `First, try a different charger and socket. If that doesn't fix it, I can raise this with IT for you:${draftBox(DRAFTS[key], key)}<span class="src">Source: IT help article · Laptop power issues</span>`;
+  }
+  if (has("apply leave","take leave","day off","leave tomorrow","leave on")){
+    const key = "d"+Date.now(); DRAFTS[key] = [{svc:"leave", t:"Casual leave · 1 day (tomorrow)"}];
+    return `Sure. Here's a leave request for tomorrow — change it if needed:${draftBox(DRAFTS[key], key)}`;
+  }
+  if (has("password","locked","unlock","login")){
+    const key = "d"+Date.now(); DRAFTS[key] = [{svc:"password", t:"Unlock account / reset password"}];
+    return `I can reset that for you. You'll get a temporary password on your registered phone.${draftBox(DRAFTS[key], key)}`;
+  }
+  if (has("payslip","form 16","tax")) return `Your October payslip is ready.<span class="src">Source: Payroll portal</span>${quick("payslip","Open payslip")}`;
+  return `I couldn't find a clear answer for that, ${name}. Here's what I can do:<br>• search all help articles for it, or<br>• send it to the HR helpdesk as a general question.<div style="display:flex;gap:8px;margin-top:10px"><button class="btn sm ghost" data-search="${esc(text)}">Search help</button></div><span class="src">No guessing: I only answer from approved content</span>`;
+}
+function quick(id, label){ return `<div style="margin-top:10px"><button class="btn sm" data-svc="${id}">${label}</button></div>`; }
+function yday(){ const d=new Date(); d.setDate(d.getDate()-1); return d.toLocaleDateString("en-IN",{day:"numeric",month:"short"}); }
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function say(text){
+  if (!text.trim()) return;
+  if (S.view !== "ask") S.view = "ask";
+  S.chat[S.me].push({u:text}); S.chat[S.me].push({b:reply(text)}); render();
+  const m = $("#msgs"); if (m) m.scrollTop = m.scrollHeight;
+}
+
+/* ---------------- service modal ---------------- */
+function openSvc(id){
+  const s = svc(id); const tm = TEAMS[s.team];
+  if (s.soon){
+    modal(`<div style="font-size:28px">${s.e}</div><h2 style="font-size:19px;margin:6px 0">${s.t}</h2><p class="meta">This service comes to OneDoor in <b>Phase 2</b>. For now, it opens in the ${tm.sys} with single sign-on — no extra login.</p><div class="route">Owner: <b>${tm.label}</b> · Runs in: <b>${tm.sys}</b></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px"><button class="btn ghost" data-close>Close</button><button class="btn" data-link="${id}">Open ${tm.sys} ↗</button></div>`);
+    return;
+  }
+  if (s.instant){
+    let body = "";
+    if (id==="leavebal"){ const b=S.leaveBal[S.me]; body = `<div class="grid g3" style="margin-top:12px">${[["Casual",b.casual],["Sick",b.sick],["Earned",b.earned]].map(x=>`<div class="card" style="padding:12px;text-align:center"><div style="font-size:26px;font-weight:800;color:var(--blue)">${x[1]}</div><div class="meta">${x[0]}</div></div>`).join("")}</div>`; }
+    if (id==="payslip") body = `<div class="card" style="margin-top:12px;padding:14px"><div class="ttl">October 2026 payslip</div><div class="meta">Generated 2 Nov · PDF</div></div>`;
+    if (id==="course") body = `<div class="card" style="margin-top:12px;padding:14px"><div class="ttl">3 mandatory courses due</div><div class="meta">Data privacy · Code of conduct · Information security</div></div>`;
+    modal(`<div style="font-size:28px">${s.e}</div><h2 style="font-size:19px;margin:6px 0">${s.t}</h2><p class="meta">${s.level==="Show"?"Shown here, live from the "+tm.sys+".":"Opens the "+tm.sys+" with single sign-on — no extra login."}</p>${body}<div class="route">Owner: <b>${tm.label}</b> · Runs in: <b>${tm.sys}</b> · Level: <b>${s.level}</b></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px"><button class="btn ghost" data-close>Close</button>${s.level==="Link"?`<button class="btn" data-link="${id}">Open ${tm.sys} ↗</button>`:""}</div>`);
+    return;
+  }
+  const fields = {
+    leave:`<label>Type</label><select><option>Casual leave</option><option>Sick leave</option><option>Earned leave</option></select><label>Dates</label><input value="Tomorrow (1 day)">`,
+    attendance:`<label>Date</label><input value="${yday()}"><label>What happened?</label><select><option>Badge didn't swipe</option><option>Forgot to swipe</option><option>Worked from home</option></select>`,
+    badge:`<label>Where?</label><select><option>Floor 4 gate</option><option>Main entrance</option><option>Parking</option></select>`,
+    laptop:`<label>What's wrong?</label><select><option>Not charging</option><option>Very slow</option><option>Screen or keyboard</option><option>Won't start</option></select>`,
+    access:`<label>Which app?</label><input value="Claims data warehouse"><label>Why do you need it?</label><input value="Monthly claims reporting">`,
+    password:`<label>Account</label><select><option>Company login</option><option>VPN</option><option>Email</option></select>`,
+  }[id] || "";
+  modal(`<div style="font-size:28px">${s.e}</div><h2 style="font-size:19px;margin:6px 0">${s.t}</h2><p class="meta">${s.d}</p>
+  <form id="sf">${fields}<label>Anything else? (optional)</label><textarea placeholder="Add details or a screenshot"></textarea>
+  <div class="route">➜ This goes to <b>${tm.label}</b> in the <b>${tm.sys}</b>${s.approval?`, after <b>${PEOPLE[me().manager||"meera"]?.name||"your manager"}</b> approves it`:""}. You'll track it in My Requests.<br><span class="meta">You don't have to open the ${tm.sys} yourself.</span></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px"><button type="button" class="btn ghost" data-close>Cancel</button><button class="btn">Submit request</button></div></form>`);
+  $("#sf").onsubmit = (e) => { e.preventDefault(); const r = newReq(id); closeModal(); toast(`✅ <b>${r.id}</b> sent to ${tm.label}. Track it in My Requests.`); go("requests"); };
+}
+function modal(html){ $("#modal").innerHTML = html; $("#ov").classList.add("on"); $("#modal").querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);
+  $("#modal").querySelectorAll("[data-link]").forEach(b=>b.onclick=()=>{ closeModal(); toast(`↗ In the real product this opens the <b>${TEAMS[svc(b.dataset.link).team].sys}</b> with single sign-on.`); }); }
+function closeModal(){ $("#ov").classList.remove("on"); }
+$("#ov").onclick = (e) => { if (e.target.id==="ov") closeModal(); };
+
+/* ---------------- events ---------------- */
+function bind(){
+  const v = $("#view");
+  v.querySelectorAll("[data-go]").forEach(b => b.onclick = () => go(b.dataset.go));
+  v.querySelectorAll("[data-svc]").forEach(b => b.onclick = (e) => { e.stopPropagation(); openSvc(b.dataset.svc); });
+  v.querySelectorAll("[data-q]").forEach(b => b.onclick = () => go("search", {q:b.dataset.q}));
+  v.querySelectorAll("[data-say]").forEach(b => b.onclick = () => say(b.dataset.say));
+  v.querySelectorAll("[data-search]").forEach(b => b.onclick = () => go("search", {q:b.dataset.search}));
+  v.querySelectorAll("[data-cat]").forEach(b => b.onclick = () => { S.catTab=b.dataset.cat; render(); });
+  v.querySelectorAll("[data-p2]").forEach(b => b.onclick = () => { S.me=b.dataset.p2; go("journeys"); });
+  const q = $("#q"), qg = $("#qgo");
+  if (q){ const run = () => { if (q.value.trim()) go("search", {q:q.value}); }; qg.onclick = run; q.onkeydown = (e) => { if (e.key==="Enter") run(); }; if (S.view==="search") q.focus(); }
+  const c = $("#composer"); if (c){ c.onsubmit = (e) => { e.preventDefault(); const t=$("#say").value; $("#say").value=""; say(t); }; $("#say").focus(); const m=$("#msgs"); m.scrollTop=m.scrollHeight; }
+  v.querySelectorAll("[data-submit]").forEach(b => b.onclick = () => {
+    const key = b.dataset.submit; const ds = DRAFTS[key]; if (!ds) return;
+    const made = ds.map(d => newReq(d.svc, d.t)); delete DRAFTS[key];
+    b.parentElement.innerHTML = `<span class="pill p-green">✓ Submitted: ${made.map(r=>r.id).join(", ")}</span>`;
+    S.chat[S.me].push({b:`Done. I've sent ${made.length>1?"both requests":"the request"}: ${made.map(r=>`<b>${r.id}</b> (${TEAMS[svc(r.svc).team].label})`).join(" and ")}. ${made.some(r=>r.needsApproval)?"Your manager has been asked to approve in Teams. ":""}You can follow ${made.length>1?"them":"it"} in <b>My Requests</b>.${quickGo()}`});
+    render(); toast(`✅ ${made.length} request${made.length>1?"s":""} created`);
+  });
+  v.querySelectorAll("[data-cancel]").forEach(b => b.onclick = () => { delete DRAFTS[b.dataset.cancel]; b.parentElement.innerHTML = `<span class="pill p-grey">Not submitted</span>`; });
+  v.querySelectorAll("[data-adv]").forEach(b => b.onclick = () => {
+    const r = S.requests.find(x=>x.id===b.dataset.adv); const steps = r.needsApproval ? STEPS_APPR : STEPS;
+    r.step++; if (r.step >= steps.length - 1){ r.status="Done"; r.step = steps.length; r.when="Just now"; r.note="Resolved"; toast(`✅ ${r.id} is done. You'll get a Teams notification.`); } else { r.status="In progress"; r.note = "With " + TEAMS[svc(r.svc).team].label; }
+    render();
+  });
+  v.querySelectorAll("[data-task]").forEach(b => b.onclick = () => { const t=S.onboarding[+b.dataset.task]; t.done=!t.done; render(); if (t.done) toast(`✓ ${t.t}`); });
+  const decide = (id, ok) => {
+    const a = S.approvals.find(x=>x.id===id); S.approvals = S.approvals.filter(x=>x.id!==id);
+    if (a.req){ const r=S.requests.find(x=>x.id===a.req); if (ok){ r.step=2; r.status="In progress"; r.note=`Approved by ${me().name}`; } else { r.status="Rejected"; r.note=`Rejected by ${me().name}`; } }
+    const who = a.who==="other" ? a.whoName : PEOPLE[a.who].name;
+    toast(ok ? `👍 Approved. ${who} is notified and the original system is updated.` : `Rejected. ${who} is notified.`); render();
+  };
+  v.querySelectorAll("[data-ok]").forEach(b => b.onclick = () => decide(b.dataset.ok, true));
+  v.querySelectorAll("[data-rej]").forEach(b => b.onclick = () => decide(b.dataset.rej, false));
+}
+function quickGo(){ return `<div style="margin-top:10px"><button class="btn sm ghost" data-go="requests">Open My Requests</button></div>`; }
+$("#bts").onclick = () => { S.showBts = !S.showBts; render(); if (S.showBts) toast("Showing which existing system handles each item. Nothing is replaced — OneDoor sits on top."); };
+
+render();
+</script>
+</body>
+</html>
